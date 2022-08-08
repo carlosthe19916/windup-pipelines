@@ -13,12 +13,17 @@ on:
         required: true
         default: "Ex: 6.1.0-SNAPSHOT"
         type: string
+      organization:
+        description: The GitHub organization of repositories
+        required: true
+        default: "windup"
+        type: string
 
 jobs:
   windup:
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: ${{ github.event.inputs.next_development_version }}
       repository: windup
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -36,7 +41,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-rulesets
+          repository: ${{ github.event.inputs.next_development_version }}/windup-rulesets
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -45,7 +50,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ github.event.inputs.release_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Preparing for release"
 
@@ -53,7 +58,7 @@ jobs:
     needs: [ windup-rulesets-before ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: ${{ github.event.inputs.next_development_version }}
       repository: windup-rulesets
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -71,7 +76,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-rulesets
+          repository: ${{ github.event.inputs.next_development_version }}/windup-rulesets
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -80,7 +85,7 @@ jobs:
         env:
           NEXT_DEVELOPMENT_VERSION: ${{ github.event.inputs.next_development_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Back to development"
 
@@ -90,7 +95,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-distribution
+          repository: ${{ github.event.inputs.next_development_version }}/windup-distribution
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -100,7 +105,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ github.event.inputs.release_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Preparing for release"
 
@@ -108,7 +113,7 @@ jobs:
     needs: [ windup-distribution-before ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: ${{ github.event.inputs.next_development_version }}
       repository: windup-distribution
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -126,7 +131,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-distribution
+          repository: ${{ github.event.inputs.next_development_version }}/windup-distribution
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -136,7 +141,7 @@ jobs:
         env:
           NEXT_DEVELOPMENT_VERSION: ${{ github.event.inputs.next_development_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Back to development"
 
@@ -146,7 +151,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-web
+          repository: ${{ github.event.inputs.next_development_version }}/windup-web
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -164,7 +169,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ github.event.inputs.release_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Preparing for release"
 
@@ -172,7 +177,7 @@ jobs:
     needs: [ windup-web-before ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: ${{ github.event.inputs.next_development_version }}
       repository: windup-web
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -190,7 +195,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-web
+          repository: ${{ github.event.inputs.next_development_version }}/windup-web
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -208,7 +213,7 @@ jobs:
         env:
           NEXT_DEVELOPMENT_VERSION: ${{ github.event.inputs.next_development_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Back to development"
 
@@ -218,7 +223,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-openshift
+          repository: ${{ github.event.inputs.next_development_version }}/windup-openshift
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -234,7 +239,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ github.event.inputs.release_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Preparing for release"
 
@@ -242,7 +247,7 @@ jobs:
     needs: [ windup-openshift-before ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: ${{ github.event.inputs.next_development_version }}
       repository: windup-openshift
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -260,7 +265,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-openshift
+          repository: ${{ github.event.inputs.next_development_version }}/windup-openshift
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -277,7 +282,7 @@ jobs:
           NEXT_DEVELOPMENT_VERSION: ${{ github.event.inputs.next_development_version }}
           NEXT_IMAGE_TAG_DEVELOPMENT_VERSION: latest
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Back to development"
 
@@ -287,7 +292,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-openshift
+          repository: ${{ github.event.inputs.next_development_version }}/windup-openshift
           token: ${{ secrets.GH_PAT }}
           ref: ${{ github.event.inputs.release_version }}
       - name: Setup Java
@@ -320,7 +325,7 @@ jobs:
     needs: [ windup-openshift-container-images ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: ${{ github.event.inputs.next_development_version }}
       repository: windup-web-distribution
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -338,7 +343,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-maven-plugin
+          repository: ${{ github.event.inputs.next_development_version }}/windup-maven-plugin
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -360,7 +365,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ github.event.inputs.release_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Preparing for release"
 
@@ -368,7 +373,7 @@ jobs:
     needs: [ windup-maven-plugin-before ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: ${{ github.event.inputs.next_development_version }}
       repository: windup-maven-plugin
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -386,7 +391,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-maven-plugin
+          repository: ${{ github.event.inputs.next_development_version }}/windup-maven-plugin
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -408,7 +413,7 @@ jobs:
         env:
           NEXT_DEVELOPMENT_VERSION: ${{ github.event.inputs.next_development_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Back to development"
 
@@ -418,7 +423,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-quickstarts
+          repository: ${{ github.event.inputs.next_development_version }}/windup-quickstarts
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -428,7 +433,7 @@ jobs:
         env:
           RELEASE_VERSION: ${{ github.event.inputs.release_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Preparing for release"
 
@@ -436,7 +441,7 @@ jobs:
     needs: [ windup-quickstarts-before ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: ${{ github.event.inputs.next_development_version }}
       repository: windup-quickstarts
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -455,7 +460,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-quickstarts
+          repository: ${{ github.event.inputs.next_development_version }}/windup-quickstarts
           token: ${{ secrets.GH_PAT }}
       - name: Set versions
         run: |
@@ -464,6 +469,6 @@ jobs:
         env:
           NEXT_DEVELOPMENT_VERSION: ${{ github.event.inputs.next_development_version }}
       - name: Commit and Push
-        uses: windup/windup-pipelines/actions/commit@main
+        uses: ${{ github.event.inputs.next_development_version }}/windup-pipelines/actions/commit@main
         with:
           commit_message: "Back to development"
