@@ -118,21 +118,21 @@ jobs:
           working-directory: repository
           commit_message: "🏁 Releasing version ${{ inputs.release_version }}"
       - name: Maven install
-        if: ${{ inputs.skip_maven_release == true }}
+        # if: ${{ inputs.skip_maven_release == true }}
         run: |
           export SETTINGS_XML=$(readlink -f ci/maven/settings.xml)          
           cd repository && mvn install -DskipTests -s $SETTINGS_XML
-      - name: Release to OSSRH
-        if: ${{ inputs.skip_maven_release != true }}
-        run: |
-          export SETTINGS_XML=$(readlink -f ci/maven/settings.xml)
-          export GPG_SCRIPT=$(readlink -f ci/scripts/gpghack.sh)
-          source ci/scripts/utils.sh
-          cd repository && release
-        env:
-          MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
-          MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
-          MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
+      # - name: Release to OSSRH
+      #   if: ${{ inputs.skip_maven_release != true }}
+      #   run: |
+      #     export SETTINGS_XML=$(readlink -f ci/maven/settings.xml)
+      #     export GPG_SCRIPT=$(readlink -f ci/scripts/gpghack.sh)
+      #     source ci/scripts/utils.sh
+      #     cd repository && release
+      #   env:
+      #     MAVEN_USERNAME: ${{ secrets.NEXUS_USERNAME }}
+      #     MAVEN_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
+      #     MAVEN_GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
       - name: Setup JReleaser
         run: |
           cp ci/${{ inputs.jreleaser_file }} repository/jreleaser.yml
@@ -157,6 +157,40 @@ jobs:
         with:
           name: ${{ inputs.repository }}-jreleaser-log
           path: "repository/jreleaser-log.tgz"
+
+  after:
+    needs: [ release ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.owner }}/${{ inputs.repository }}
+          token: ${{ secrets.GH_PAT }}
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: 11
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ inputs.cache_key }}-${{ github.run_id }}-after
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ inputs.cache_key_to_restore }}-${{ github.run_id }}
+      - name: Login to Registry
+        uses: docker/login-action@v2
+        with:
+          registry: quay.io
+          username: ${{ secrets.QUAYIO_USERNAME }}
+          password: ${{ secrets.QUAYIO_PASSWORD }}
+
+      - name: Executing script
+        run: ${{ inputs.after_script }}
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          NEXT_VERSION: ${{ inputs.release_version }}
+
       - name: Set next development version ${{ inputs.next_development_version }}
         run: |
           export SETTINGS_XML=$(readlink -f ci/maven/settings.xml)
@@ -169,21 +203,3 @@ jobs:
         with:
           working-directory: repository
           commit_message: "⬆️  Next version ${{ inputs.next_development_version }}"
-
-  after:
-    needs: [ release ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: ${{ inputs.owner }}/${{ inputs.repository }}
-          token: ${{ secrets.GH_PAT }}
-      - name: Executing script
-        run: ${{ inputs.after_script }}
-        env:
-          RELEASE_VERSION: ${{ inputs.release_version }}
-          NEXT_VERSION: ${{ inputs.release_version }}
-      - name: Commit and Push
-        uses: ${{ inputs.owner }}/windup-pipelines/actions/commit@main
-        with:
-          commit_message: "Back to development"

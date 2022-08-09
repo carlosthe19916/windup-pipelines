@@ -158,6 +158,17 @@ jobs:
         git add templates/src/main/resources/web-template-empty-dir-executor.json
         git add templates/src/main/resources/web-template-empty-dir-executor-shared-storage.json
       after_script: |
+        # Container image creation
+        mvn install -DskipTests \
+        -Ddocker.name.windup.web=quay.io/${{ github.event.inputs.registry_organization }}/windup-web-openshift:$RELEASE_VERSION \
+        -Ddocker.name.windup.web.executor=quay.io/${{ github.event.inputs.registry_organization }}/windup-web-openshift-messaging-executor:$RELEASE_VERSION \
+        -Ddocker.name.windup.cli=quay.io/${{ github.event.inputs.registry_organization }}/windup-cli-openshift:$RELEASE_VERSION
+        
+        docker image push quay.io/${{ github.event.inputs.registry_organization }}/windup-web-openshift:$RELEASE_VERSION
+        docker image push quay.io/${{ github.event.inputs.registry_organization }}/windup-web-openshift-messaging-executor:$RELEASE_VERSION
+        docker image push quay.io/${{ github.event.inputs.registry_organization }}/windup-cli-openshift:$RELEASE_VERSION
+        
+        # Prepare next release
         sed -i -e "s/<version.windup.cli>.*<\/version.windup.cli>/<version.windup.cli>${NEXT_DEVELOPMENT_VERSION}<\/version.windup.cli>/g" cli/pom.xml
         git add cli/pom.xml
         
@@ -175,47 +186,6 @@ jobs:
       NEXUS_PASSWORD: ${{ secrets.NEXUS_PASSWORD }}
       GPG_PRIVATE_KEY: ${{ secrets.GPG_PRIVATE_KEY }}
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
-
-  windup-openshift-container-images:
-    needs: [ windup-openshift ]
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: windup/windup-openshift
-          token: ${{ secrets.GH_PAT }}
-          ref: ${{ github.event.inputs.release_version }}
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: 11
-      - name: Cache local Maven repository
-        uses: actions/cache@v3
-        with:
-          path: ~/.m2/repository
-          key: ${{ runner.os }}-maven-windup-openshift-container-images-${{ github.run_id }}
-          restore-keys: |
-            ${{ runner.os }}-maven-windup-web-${{ github.run_id }}
-      - name: Create container images
-        run: |
-          mvn install -DskipTests \
-          -Ddocker.name.windup.web=quay.io/${{ github.event.inputs.registry_organization }}/windup-web-openshift:$TAG \
-          -Ddocker.name.windup.web.executor=quay.io/${{ github.event.inputs.registry_organization }}/windup-web-openshift-messaging-executor:$TAG \
-          -Ddocker.name.windup.cli=quay.io/${{ github.event.inputs.registry_organization }}/windup-cli-openshift:$TAG
-        env:
-          TAG: ${{ github.event.inputs.release_version }}
-      - name: Login to Registry
-        uses: docker/login-action@v2
-        with:
-          registry: quay.io
-          username: ${{ secrets.QUAYIO_USERNAME }}
-          password: ${{ secrets.QUAYIO_PASSWORD }}
-      - name: Push images to registry
-        run: |
-          docker image push --all-tags quay.io/${{ github.event.inputs.registry_organization }}/windup-web-openshift
-          docker image push --all-tags quay.io/${{ github.event.inputs.registry_organization }}/windup-web-openshift-messaging-executor
-          docker image push --all-tags quay.io/${{ github.event.inputs.registry_organization }}/windup-cli-openshift
 
   windup-web-distribution:
     needs: [ windup-openshift-container-images ]
