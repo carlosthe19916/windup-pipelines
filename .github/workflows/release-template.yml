@@ -23,6 +23,18 @@ on:
         required: false
         default: false
         type: boolean
+      before_script:
+        description: Script to run before release
+        required: false
+        default: |
+          echo "Nothing to do"
+        type: string
+      after_script:
+        description: Script to run after release
+        required: false
+        default: |
+          echo "Nothing to do"
+        type: string
     secrets:
       GITHUB_PAT:
         required: true
@@ -36,7 +48,25 @@ on:
         required: true
 
 jobs:
+  before:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.owner }}/${{ inputs.repository }}
+          token: ${{ secrets.GH_PAT }}
+      - name: Executing script
+        run: ${{ inputs.before_script }}
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          NEXT_VERSION: ${{ inputs.release_version }}
+      - name: Commit and Push
+        uses: ${{ inputs.owner }}/windup-pipelines/actions/commit@main
+        with:
+          commit_message: "Preparing for release"
+
   release:
+    needs: [ before ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout CI
@@ -50,17 +80,17 @@ jobs:
           path: repository
           fetch-depth: 0
           token: ${{ secrets.GITHUB_PAT }}
-      - name: Setup Java
-        uses: actions/setup-java@v3
-        with:
-          distribution: "temurin"
-          java-version: 11
-          cache: "maven"
-          server-id: ossrh
-          server-username: MAVEN_USERNAME
-          server-password: MAVEN_PASSWORD
-          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+- name: Setup Java
+  uses: actions/setup-java@v3
+  with:
+    distribution: "temurin"
+    java-version: 11
+    cache: "maven"
+    server-id: ossrh
+    server-username: MAVEN_USERNAME
+    server-password: MAVEN_PASSWORD
+    gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+    gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - name: Set release version ${{ inputs.release_version }}
         run: |
           export SETTINGS_XML=$(readlink -f ci/maven/settings.xml)
@@ -101,7 +131,7 @@ jobs:
         env:
           JRELEASER_PROJECT_VERSION: ${{ inputs.release_version }}
           JRELEASER_TAG_NAME: ${{ inputs.release_version }}
-          JRELEASER_PREVIOUS_TAG_NAME: ${{ inputs.previous_version }}
+          JRELEASER_PRERELEASE_PATTERN: "*.Alpha*"
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_PAT }}
       - name: JReleaser - generate log
         if: always()
@@ -125,3 +155,21 @@ jobs:
         with:
           working-directory: repository
           commit_message: "⬆️  Next version ${{ inputs.next_development_version }}"
+
+  after:
+    needs: [ release ]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          repository: ${{ inputs.owner }}/${{ inputs.repository }}
+          token: ${{ secrets.GH_PAT }}
+      - name: Executing script
+        run: ${{ inputs.after_script }}
+        env:
+          RELEASE_VERSION: ${{ inputs.release_version }}
+          NEXT_VERSION: ${{ inputs.release_version }}
+      - name: Commit and Push
+        uses: ${{ inputs.owner }}/windup-pipelines/actions/commit@main
+        with:
+          commit_message: "Back to development"
