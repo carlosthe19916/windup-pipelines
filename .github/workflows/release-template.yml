@@ -35,6 +35,14 @@ on:
         default: |
           echo "Nothing to do"
         type: string
+      cache_key:
+        description: The cache key to restore after java-setup
+        required: true
+        type: string
+      cache_key_to_restore:
+        description: The cache key to create after post java-setup
+        required: true
+        type: string
     secrets:
       GITHUB_PAT:
         required: true
@@ -80,17 +88,23 @@ jobs:
           path: repository
           fetch-depth: 0
           token: ${{ secrets.GITHUB_PAT }}
-- name: Setup Java
-  uses: actions/setup-java@v3
-  with:
-    distribution: "temurin"
-    java-version: 11
-    cache: "maven"
-    server-id: ossrh
-    server-username: MAVEN_USERNAME
-    server-password: MAVEN_PASSWORD
-    gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
-    gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Setup Java
+        uses: actions/setup-java@v3
+        with:
+          distribution: "temurin"
+          java-version: 11
+          server-id: ossrh
+          server-username: MAVEN_USERNAME
+          server-password: MAVEN_PASSWORD
+          gpg-private-key: ${{ secrets.GPG_PRIVATE_KEY }}
+          gpg-passphrase: MAVEN_GPG_PASSPHRASE
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ inputs.cache_key }}-${{ github.run_id }}
+          restore-keys: |
+            ${{ runner.os }}-maven-${{ inputs.cache_key_to_restore }}-${{ github.run_id }}
       - name: Set release version ${{ inputs.release_version }}
         run: |
           export SETTINGS_XML=$(readlink -f ci/maven/settings.xml)
