@@ -22,7 +22,7 @@ jobs:
   windup:
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: carlosthe19916
       repository: windup
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -41,7 +41,7 @@ jobs:
     needs: [ windup ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: carlosthe19916
       repository: windup-rulesets
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -64,7 +64,7 @@ jobs:
     needs: [ windup-rulesets ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: carlosthe19916
       repository: windup-distribution
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -87,7 +87,7 @@ jobs:
     needs: [ windup-distribution ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: carlosthe19916
       repository: windup-web
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -110,7 +110,7 @@ jobs:
     needs: [ windup-web ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: carlosthe19916
       repository: windup-openshift
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -161,9 +161,9 @@ jobs:
       - name: Create container images
         run: |
           mvn install -DskipTests \
-          -Ddocker.name.windup.web=quay.io/windupeng/windup-web-openshift:$TAG \
-          -Ddocker.name.windup.web.executor=quay.io/windupeng/windup-web-openshift-messaging-executor:$TAG \
-          -Ddocker.name.windup.cli=quay.io/windupeng/windup-cli-openshift:$TAG
+          -Ddocker.name.windup.web=quay.io/carlosthe19916/windup-web-openshift:$TAG \
+          -Ddocker.name.windup.web.executor=quay.io/carlosthe19916/windup-web-openshift-messaging-executor:$TAG \
+          -Ddocker.name.windup.cli=quay.io/carlosthe19916/windup-cli-openshift:$TAG
         env:
           TAG: ${{ github.event.inputs.release_version }}
       - name: Login to Registry
@@ -174,15 +174,15 @@ jobs:
           password: ${{ secrets.QUAYIO_PASSWORD }}
       - name: Push images to registry
         run: |
-          docker image push --all-tags quay.io/windupeng/windup-web-openshift
-          docker image push --all-tags quay.io/windupeng/windup-web-openshift-messaging-executor
-          docker image push --all-tags quay.io/windupeng/windup-cli-openshift
+          docker image push --all-tags quay.io/carlosthe19916/windup-web-openshift
+          docker image push --all-tags quay.io/carlosthe19916/windup-web-openshift-messaging-executor
+          docker image push --all-tags quay.io/carlosthe19916/windup-cli-openshift
 
   windup-web-distribution:
     needs: [ windup-openshift ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: carlosthe19916
       repository: windup-web-distribution
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -205,7 +205,7 @@ jobs:
     needs: [ windup-web-distribution ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: carlosthe19916
       repository: windup-maven-plugin
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
@@ -228,7 +228,7 @@ jobs:
     needs: [ windup-maven-plugin ]
     uses: ./.github/workflows/release-template.yml
     with:
-      owner: windup
+      owner: carlosthe19916
       repository: windup-quickstarts
       release_version: ${{ github.event.inputs.release_version }}
       next_development_version: ${{ github.event.inputs.next_development_version }}
