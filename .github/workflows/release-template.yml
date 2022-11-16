@@ -80,7 +80,7 @@ jobs:
           gpg-passphrase: MAVEN_GPG_PASSPHRASE
       - name: Setup other tools
         run: |
-          apt-get install -y groovy
+          sudo apt-get install -y groovy
       - name: Cache local Maven repository
         uses: actions/cache@v3
         with:
