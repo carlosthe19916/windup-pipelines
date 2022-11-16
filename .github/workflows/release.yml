@@ -136,7 +136,7 @@ jobs:
       GPG_PASSPHRASE: ${{ secrets.GPG_PASSPHRASE }}
 
   windup-openshift-container-images:
-    needs: [ windup-web ]
+    needs: [ windup-openshift ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
