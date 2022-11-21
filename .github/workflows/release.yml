@@ -141,7 +141,7 @@ jobs:
     steps:
       - uses: actions/checkout@v3
         with:
-          repository: windup/windup-openshift
+          repository: carlosthe19916/windup-openshift
           token: ${{ secrets.GH_PAT }}
           ref: ${{ github.event.inputs.release_version }}
       - name: Setup Java
